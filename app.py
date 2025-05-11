@@ -35,6 +35,36 @@ wardrobe = st.text_area("List your wardrobe items (comma separated)",
                         "white cropped blouse, high-waisted black jeans, oversized beige blazer, white sneakers, black ankle boots, cream knit sweater")
 wardrobe_list = [item.strip() for item in wardrobe.split(",") if item.strip()]
 
+from PIL import Image
+import io
+
+# Wardrobe Upload Section
+st.header("🖼️ Upload Wardrobe Images")
+
+uploaded_images = st.file_uploader("Upload images of your clothing items", type=["jpg", "png", "jpeg"], accept_multiple_files=True)
+
+tagged_items = []
+
+def mock_tag_item(image_bytes):
+    # Placeholder — Replace this with AI Vision tagging (e.g., CLIP or GPT-4 Vision)
+    return "unknown top (mock)"
+
+if uploaded_images:
+    for img_file in uploaded_images:
+        image = Image.open(img_file)
+        st.image(image, caption="Uploaded Image", width=150)
+
+        # Get mock tag
+        tag = mock_tag_item(img_file.getvalue())
+        item_desc = st.text_input(f"Describe or confirm this item:", tag, key=img_file.name)
+
+        if st.button(f"Add '{item_desc}' to wardrobe", key=f"add_{img_file.name}"):
+            tagged_items.append(item_desc)
+
+# Append tagged items to the wardrobe list
+wardrobe_list.extend(tagged_items)
+
+
 st.header("📅 Context")
 event = st.text_input("Event", "coffee date")
 season = st.selectbox("Season", ["spring", "summer", "fall", "winter"], index=0)
