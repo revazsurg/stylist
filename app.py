@@ -8,8 +8,29 @@ st.title("👗 Wardrobe Whisperer")
 st.subheader("Your personal AI stylist")
 st.markdown("---")
 
-# Setup OpenAI client (using new SDK style)
+from PIL import Image
+import base64
+import io
+
+# GPT-4 Vision model access
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+def gpt4_vision_tag(image_bytes):
+    base64_image = base64.b64encode(image_bytes).decode("utf-8")
+    prompt = "Describe this clothing item in a short, ecommerce-style phrase (e.g., 'cream wool blazer' or 'black leather sneakers'). Avoid extra commentary."
+
+    response = client.chat.completions.create(
+        model="gpt-4-vision-preview",
+        messages=[
+            {"role": "user", "content": [
+                {"type": "text", "text": prompt},
+                {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+            ]}
+        ],
+        max_tokens=100
+    )
+
+    return response.choices[0].message.content.strip()
 
 # === Sidebar: User Profile ===
 st.sidebar.header("🧍 User Profile")
@@ -45,25 +66,20 @@ uploaded_images = st.file_uploader("Upload images of your clothing items", type=
 
 tagged_items = []
 
-def mock_tag_item(image_bytes):
-    # Placeholder — Replace this with AI Vision tagging (e.g., CLIP or GPT-4 Vision)
-    return "unknown top (mock)"
-
 if uploaded_images:
-    for img_file in uploaded_images:
-        image = Image.open(img_file)
-        st.image(image, caption="Uploaded Image", width=150)
+    st.info("Give it a moment... each item will be tagged using GPT-4 Vision.")
+    for image_file in uploaded_images:
+        image = Image.open(image_file)
+        st.image(image, caption="Uploaded", width=150)
 
-        # Get mock tag
-        tag = mock_tag_item(img_file.getvalue())
-        item_desc = st.text_input(f"Describe or confirm this item:", tag, key=img_file.name)
+        # Run GPT-4 Vision on the image
+        tag = gpt4_vision_tag(image_file.getvalue())
+        user_tag = st.text_input(f"Edit tag for this item:", tag, key=image_file.name)
 
-        if st.button(f"Add '{item_desc}' to wardrobe", key=f"add_{img_file.name}"):
-            tagged_items.append(item_desc)
+        if st.button(f"Add '{user_tag}' to wardrobe", key=f"add_{image_file.name}"):
+            tagged_items.append(user_tag)
 
-# Append tagged items to the wardrobe list
 wardrobe_list.extend(tagged_items)
-
 
 st.header("📅 Context")
 event = st.text_input("Event", "coffee date")
