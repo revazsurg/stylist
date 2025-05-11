@@ -101,7 +101,12 @@ season = st.selectbox("Season", ["spring", "summer", "fall", "winter"], index=0)
 temperature = st.slider("Temperature (°C)", 0, 40, 20)
 rain_expected = st.checkbox("Rain Expected?", value=False)
 purchase_enabled = st.checkbox("Enable Shopping Suggestions?", value=True)
-show_in_georgian = st.checkbox("🇬🇪 Show output in Georgian", value=True)
+
+if "show_in_georgian" not in st.session_state:
+    st.session_state["show_in_georgian"] = True
+
+st.session_state["show_in_georgian"] = st.checkbox("🇬🇪 Show output in Georgian", value=st.session_state["show_in_georgian"])
+
 
 # === Generate Outfit Suggestion ===
 if st.button("👚 Get My Outfit"):
@@ -129,7 +134,7 @@ Suggest a stylish outfit using their wardrobe. If any items are missing, recomme
             )
             reply = response.choices[0].message.content.strip()
 
-            if show_in_georgian:
+            if st.session_state["show_in_georgian"]:
                 st.subheader("🪄 სტილისტის რჩევა ქართულად")
                 ge_reply = localize_to_georgian(reply)
                 st.markdown(ge_reply)
