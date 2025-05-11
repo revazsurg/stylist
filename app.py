@@ -20,7 +20,7 @@ def gpt4_vision_tag(image_bytes):
     prompt = "Describe this clothing item in a short, ecommerce-style phrase (e.g., 'cream wool blazer' or 'black leather sneakers'). Avoid extra commentary."
 
     response = client.chat.completions.create(
-        model="gpt-4-vision-preview",
+        model="gpt-4o",
         messages=[
             {"role": "user", "content": [
                 {"type": "text", "text": prompt},
