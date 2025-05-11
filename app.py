@@ -1,16 +1,15 @@
 import streamlit as st
-import openai
+from openai import OpenAI
 import os
 
-# Access the secret key
-openai.api_key = st.secrets["OPENAI_API_KEY"]
-
+# Setup Streamlit
 st.set_page_config(page_title="Wardrobe Whisperer", page_icon="🧥")
-
 st.title("👗 Wardrobe Whisperer")
 st.subheader("Your personal AI stylist")
-
 st.markdown("---")
+
+# Setup OpenAI client (using new SDK style)
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # === Sidebar: User Profile ===
 st.sidebar.header("🧍 User Profile")
@@ -58,8 +57,8 @@ Suggest a stylish outfit using their wardrobe. If any items are missing, recomme
 
     with st.spinner("Stylist thinking... 👠"):
         try:
-            response = openai.ChatCompletion.create(
-                model="gpt-4",  # or "gpt-3.5-turbo"
+            response = client.chat.completions.create(
+                model="gpt-4",  # or use "gpt-3.5-turbo"
                 messages=[
                     {"role": "system", "content": "You are a friendly and stylish AI fashion assistant."},
                     {"role": "user", "content": prompt}
@@ -68,7 +67,7 @@ Suggest a stylish outfit using their wardrobe. If any items are missing, recomme
                 max_tokens=800
             )
 
-            reply = response["choices"][0]["message"]["content"]
+            reply = response.choices[0].message.content
             st.subheader("🪄 AI Stylist Suggestion")
             st.markdown(reply)
 
